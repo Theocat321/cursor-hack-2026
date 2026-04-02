@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import PreviewPage from './PreviewPage.jsx'
 
 const STYLE_GUIDELINES_KEY = 'recorder-style-guidelines'
 
@@ -20,6 +21,10 @@ export default function App() {
   const [testLoading, setTestLoading] = useState(false)
   const [testError, setTestError] = useState(null)
   const [testPayload, setTestPayload] = useState(null)
+
+  const [pipelineLoading, setPipelineLoading] = useState(false)
+  const [pipelineError, setPipelineError] = useState(null)
+  const [previewData, setPreviewData] = useState(null)
 
   useEffect(() => {
     try {
@@ -56,6 +61,31 @@ export default function App() {
     }
   }
 
+  async function handleRunPipeline() {
+    setPipelineLoading(true)
+    setPipelineError(null)
+
+    try {
+      const res = await fetch('/pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setPipelineError(data.detail || 'Pipeline failed')
+      } else {
+        setPreviewData(data)
+      }
+    } catch (err) {
+      setPipelineError(err.message)
+    } finally {
+      setPipelineLoading(false)
+    }
+  }
+
   async function handleTestComparison() {
     setTestLoading(true)
     setTestError(null)
@@ -75,6 +105,15 @@ export default function App() {
     } finally {
       setTestLoading(false)
     }
+  }
+
+  if (previewData) {
+    return (
+      <PreviewPage
+        previewUrls={previewData.preview_urls}
+        brainResults={previewData.brain_results}
+      />
+    )
   }
 
   const variants = testPayload?.variants ?? []
@@ -132,7 +171,7 @@ export default function App() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example.com"
-                disabled={loading}
+                disabled={loading || pipelineLoading}
                 required
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:cursor-not-allowed disabled:opacity-60"
               />
@@ -140,10 +179,18 @@ export default function App() {
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || pipelineLoading}
                 className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[7rem]"
               >
                 {loading ? 'Recording…' : 'Record'}
+              </button>
+              <button
+                type="button"
+                onClick={handleRunPipeline}
+                disabled={loading || pipelineLoading || !url}
+                className="w-full rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              >
+                {pipelineLoading ? 'Running pipeline…' : 'Run Pipeline'}
               </button>
               <button
                 type="button"
@@ -165,6 +212,12 @@ export default function App() {
           {error && (
             <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900">
               Error: {error}
+            </p>
+          )}
+
+          {pipelineError && (
+            <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900">
+              Pipeline error: {pipelineError}
             </p>
           )}
 
