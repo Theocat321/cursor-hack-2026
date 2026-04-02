@@ -13,7 +13,6 @@ const STEPS = [
   { label: 'Record & Scan', icon: '🧠' },
   { label: 'Brain Response', icon: '📊' },
   { label: 'LLM Analysis', icon: '🤖' },
-  { label: 'Both Variants', icon: '👀' },
   { label: 'Compare Scans', icon: '⚡' },
   { label: 'Verdict', icon: '🏆' },
   { label: 'Next Iteration', icon: '🔄' },
@@ -269,18 +268,18 @@ export default function App() {
         return { ...s, activeStep: 0, loading: true };
       }
 
-      // Step 3 → 4: trigger loading for second TRIBE scan
-      if (next === 4 && !s.scan2) {
+      // Step 2 → 3: trigger loading for second TRIBE scan
+      if (next === 3 && !s.scan2) {
         setTimeout(() => {
           setState((prev) => ({ ...prev, scan2: mockScanModified, loading: false }));
         }, 2500);
-        return { ...s, activeStep: 4, loading: true };
+        return { ...s, activeStep: 3, loading: true };
       }
 
       const patch: Partial<State> = {};
-      if (next === 2) patch.suggestion = mockSuggestion;
-      // Step 3: show both variants — add variant B if not yet present
-      if (next === 3) {
+      // Step 2: LLM analysis — add variant B to left panel
+      if (next === 2) {
+        patch.suggestion = mockSuggestion;
         const modifiedPort = BASE_PORT + s.iteration;
         const alreadyAdded = s.variants.some((v) => v.port === modifiedPort);
         if (!alreadyAdded) {
@@ -335,19 +334,8 @@ export default function App() {
     if (active === 2 && state.suggestion && state.scan1) {
       return <CascadingLLM suggestion={state.suggestion} scan={state.scan1} />;
     }
-    // Step 3: both variants — just label, iframes on left
+    // Step 3: compare scans (loading first)
     if (active === 3) {
-      return (
-        <div className="flex items-center justify-center h-full text-center">
-          <div>
-            <p className="text-sm font-mono text-muted">← Both variants now visible</p>
-            <p className="text-[10px] text-muted/60 mt-1">Original vs LLM-modified design</p>
-          </div>
-        </div>
-      );
-    }
-    // Step 4: side-by-side brain scans (loading first)
-    if (active === 4) {
       if (state.loading || !state.scan2) return <ScannerLoading />;
       return (
         <div className="flex items-center justify-center gap-8 h-full">
@@ -357,8 +345,8 @@ export default function App() {
         </div>
       );
     }
-    // Step 5: verdict
-    if (active === 5 && state.scan1 && state.scan2) {
+    // Step 4: verdict
+    if (active === 4 && state.scan1 && state.scan2) {
       return (
         <div className="flex flex-col items-center justify-center h-full">
           <div className="text-6xl font-mono font-extrabold bg-gradient-to-r from-accent to-purple bg-clip-text text-transparent">+{uplift.toFixed(0)}%</div>
@@ -376,8 +364,8 @@ export default function App() {
         </div>
       );
     }
-    // Step 6: restart
-    if (active === 6) {
+    // Step 5: restart
+    if (active === 5) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <div className="text-5xl">🔄</div>
@@ -443,7 +431,7 @@ export default function App() {
           {state.variants.map((v, i) => {
             const isCurrentA = v.port === BASE_PORT + state.iteration - 1;
             const isCurrentB = v.port === BASE_PORT + state.iteration;
-            const isActive = isCurrentA || (isCurrentB && active >= 3);
+            const isActive = isCurrentA || (isCurrentB && active >= 2);
 
             return (
               <div key={v.port} className={`transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-40'}`}>
@@ -457,7 +445,7 @@ export default function App() {
           })}
 
           {/* Placeholder for next variant (only during current iteration before step 3) */}
-          {active < 3 && (
+          {active < 2 && (
             <div className="h-[280px] bg-surface border border-border rounded-lg flex items-center justify-center opacity-40">
               <p className="text-xs font-mono text-muted/30">Next variant — waiting for LLM</p>
             </div>
