@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { mockScanOriginal, mockScanModified, mockSuggestion } from './mocks/data';
 import type { BrainScanResult, LLMSuggestion } from './types';
 
-const ORIGINAL_URL = 'http://localhost:5173';
+const ORIGINAL_URL = 'http://localhost:6001';
+const MODIFIED_URL = 'http://localhost:6002';
 
 const STEPS = [
   { label: 'Record & Scan', icon: '🧠' },
@@ -416,7 +417,7 @@ export default function App() {
         <div className="border-r border-border p-4 flex flex-col gap-3 overflow-hidden">
           <SiteFrame url={ORIGINAL_URL} label="londonmaxxing.com — Original" className="flex-1" />
           {active >= 3 ? (
-            <SiteFrame url={ORIGINAL_URL} label="londonmaxxing.com/v2 — Modified" className="flex-1" />
+            <SiteFrame url={MODIFIED_URL} label="londonmaxxing.com/v2 — Modified" className="flex-1" />
           ) : (
             <div className="flex-1 bg-surface border border-border rounded-lg flex items-center justify-center">
               <p className="text-xs font-mono text-muted/30">Variant B — waiting for LLM</p>
