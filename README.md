@@ -18,6 +18,48 @@ Backend
 - Suggest design changes
 - make a pr with design changes
 
+## Backend Setup
+
+**Prerequisites**
+
+```bash
+brew install ffmpeg
+```
+
+**Install dependencies**
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+git clone https://github.com/facebookresearch/tribev2 /tmp/tribev2
+pip install -e /tmp/tribev2
+pip install eval_type_backport "pydantic>=2.10"
+playwright install chromium
+```
+
+**Environment**
+
+```bash
+export OPENAI_API_KEY=sk-...   # required for LLM step
+export HF_TOKEN=hf_...         # optional, avoids HuggingFace rate limits
+```
+
+**Run**
+
+```bash
+uvicorn main:app --reload
+```
+
+**Test the pipeline**
+
+```bash
+curl -X POST http://localhost:8000/pipeline \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com"}'
+```
+
 
 
 Frontend
