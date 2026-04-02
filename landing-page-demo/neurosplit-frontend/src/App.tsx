@@ -8,12 +8,42 @@ const stats = [
 ];
 
 const people = [
-  { descriptor: 'Between things', role: 'Ex-Google, exploring' },
-  { descriptor: 'Building something unnamed', role: 'Stealth founder' },
-  { descriptor: 'Accidentally excellent at something niche', role: 'AI researcher' },
-  { descriptor: 'Left a good job for a weird one', role: 'Creative technologist' },
-  { descriptor: 'Knows everyone somehow', role: 'Community builder' },
-  { descriptor: 'Quietly reshaping an industry', role: 'Deep tech founder' },
+  {
+    name: 'Demis Hassabis',
+    descriptor: 'Proved AI could master anything',
+    role: 'Co-founder & CEO, Google DeepMind',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Demis_Hassabis_Royal_Society.jpg/440px-Demis_Hassabis_Royal_Society.jpg',
+  },
+  {
+    name: 'Mustafa Suleyman',
+    descriptor: 'From North London to reshaping Microsoft',
+    role: 'CEO, Microsoft AI',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Mustafa_Suleyman_at_TechCrunch_Disrupt_London_2016_%28cropped%29.jpg/440px-Mustafa_Suleyman_at_TechCrunch_Disrupt_London_2016_%28cropped%29.jpg',
+  },
+  {
+    name: 'Anne Boden',
+    descriptor: 'Built a bank from a coffee shop',
+    role: 'Founder, Starling Bank',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Anne_Boden_headshot.jpg/440px-Anne_Boden_headshot.jpg',
+  },
+  {
+    name: 'Nikolay Storonsky',
+    descriptor: 'Turned a prepaid card into a $33B fintech',
+    role: 'Founder & CEO, Revolut',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Nikolay_Storonsky.png/440px-Nikolay_Storonsky.png',
+  },
+  {
+    name: 'Eileen Burbidge',
+    descriptor: 'The connector who backs the bold ones',
+    role: 'Partner, Passion Capital',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Eileen_Burbidge.jpg/440px-Eileen_Burbidge.jpg',
+  },
+  {
+    name: 'Azeem Azhar',
+    descriptor: 'Maps the exponential age from London',
+    role: 'Founder, Exponential View',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Azeem_Azhar_in_2023.jpg/440px-Azeem_Azhar_in_2023.jpg',
+  },
 ];
 
 export default function App() {
@@ -47,7 +77,7 @@ export default function App() {
       </section>
 
       {/* ── Pulse Stats ──────────────────────── */}
-      <section className="py-16 px-6">
+      <section className="pt-80 pb-16 px-6">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
           {stats.map((stat) => (
             <div
@@ -91,11 +121,16 @@ export default function App() {
           <h2 className="text-sm text-gray-500 uppercase tracking-[0.2em] mb-10 text-center">
             The people you'll meet
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
             {people.map((person) => (
-              <div key={person.descriptor} className="text-center">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue to-magenta mx-auto mb-4 opacity-80" />
-                <p className="text-white font-medium text-sm">
+              <div key={person.name} className="text-center">
+                <img
+                  src={person.img}
+                  alt={person.name}
+                  className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-blue/30 grayscale hover:grayscale-0 transition-all duration-300"
+                />
+                <p className="text-white font-semibold text-sm">{person.name}</p>
+                <p className="text-blue/80 text-xs mt-1 italic">
                   "{person.descriptor}"
                 </p>
                 <p className="text-gray-500 text-xs mt-1">{person.role}</p>
