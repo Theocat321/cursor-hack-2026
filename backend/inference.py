@@ -4,7 +4,16 @@ import tempfile
 
 from tribev2 import TribeModel
 
-model = TribeModel.from_pretrained("facebook/tribev2", cache_folder="./cache", device="cpu")
+model = TribeModel.from_pretrained(
+    "facebook/tribev2",
+    cache_folder="./cache",
+    device="cpu",
+    config_update={
+        "data.text_feature.device": "cpu",
+        "data.audio_feature.device": "cpu",
+        "data.video_feature.image.device": "cpu",
+    },
+)
 
 
 def run_inference(video_path: str) -> dict:
@@ -21,7 +30,11 @@ def run_inference(video_path: str) -> dict:
 
         df = model.get_events_dataframe(video_path=mp4_path)
         preds, segments = model.predict(events=df)
-        return {"preds": preds.tolist(), "segments": segments}
+        segments_serializable = [
+            {"start": float(s.start), "duration": float(s.duration), "timeline": s.timeline}
+            for s in segments
+        ]
+        return {"preds": preds.tolist(), "segments": segments_serializable}
     finally:
         if mp4_path and os.path.exists(mp4_path):
             os.remove(mp4_path)
