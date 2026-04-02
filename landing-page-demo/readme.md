@@ -1,0 +1,1 @@
+Vibe code me a landing page for some arbitrary project that we can test on in this folder
