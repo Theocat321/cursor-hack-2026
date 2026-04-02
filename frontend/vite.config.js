@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/record': 'http://localhost:8000',
+      '/pipeline': 'http://localhost:8000',
       '/test': 'http://localhost:8000',
       '/test-preview': 'http://localhost:8000',
     },
