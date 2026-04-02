@@ -44,9 +44,10 @@ describe('App', () => {
     await userEvent.type(screen.getByPlaceholderText('https://example.com'), 'https://example.com')
     await userEvent.click(screen.getByRole('button', { name: 'Record' }))
 
-    await waitFor(() =>
-      expect(screen.getByText(/Done! Saved to: recordings\/abc\.webm/)).toBeInTheDocument()
-    )
+    await waitFor(() => {
+      expect(screen.getByText('Done! Saved to:')).toBeInTheDocument()
+      expect(screen.getByText('recordings/abc.webm')).toBeInTheDocument()
+    })
   })
 
   it('shows error message when fetch fails', async () => {
@@ -62,5 +63,42 @@ describe('App', () => {
     await waitFor(() =>
       expect(screen.getByText(/browser crashed/)).toBeInTheDocument()
     )
+  })
+
+  it('loads test comparison and shows two preview panes', async () => {
+    const testBody = {
+      variants: [
+        {
+          id: 'a',
+          title: 'Version A',
+          iframeUrl: '/test-preview/a',
+          brainImageUrl: 'data:image/svg+xml;base64,PHN2Zy8+',
+        },
+        {
+          id: 'b',
+          title: 'Version B',
+          iframeUrl: '/test-preview/b',
+          brainImageUrl: 'data:image/svg+xml;base64,PHN2Zy8+',
+        },
+      ],
+      tribeNote: 'TRIBE note for tests.',
+    }
+
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: async () => testBody,
+    })
+
+    render(<App />)
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Test comparison (2 previews)' })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /side-by-side previews/i })).toBeInTheDocument()
+      expect(screen.getByTitle('Preview a')).toBeInTheDocument()
+      expect(screen.getByTitle('Preview b')).toBeInTheDocument()
+      expect(screen.getByText(/TRIBE note for tests/)).toBeInTheDocument()
+    })
   })
 })
