@@ -31,7 +31,8 @@ interface State {
   scan2: BrainScanResult | null;
   suggestion: LLMSuggestion | null;
   loading: boolean;
-  variants: Variant[]; // all variants accumulated across iterations
+  variants: Variant[];
+  variantRevealed: boolean; // true once LLM cascade finishes and new variant is shown
 }
 
 // ── Loading scanner graphic ──────────────────────────
@@ -163,19 +164,21 @@ function SmallBrainVis({ scan, label }: { scan: BrainScanResult; label: string }
 }
 
 // ── Cascading LLM output ─────────────────────────────
-function CascadingLLM({ suggestion, scan }: { suggestion: LLMSuggestion; scan: BrainScanResult }) {
+function CascadingLLM({ suggestion, scan, onComplete }: { suggestion: LLMSuggestion; scan: BrainScanResult; onComplete?: () => void }) {
   const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
     setVisibleCount(0);
-    // summary appears first, then each change card
     const total = 1 + suggestion.changes.length;
     const timers: number[] = [];
     for (let i = 0; i < total; i++) {
-      timers.push(window.setTimeout(() => setVisibleCount(i + 1), 400 * (i + 1)));
+      timers.push(window.setTimeout(() => {
+        setVisibleCount(i + 1);
+        if (i === total - 1 && onComplete) onComplete();
+      }, 400 * (i + 1)));
     }
     return () => timers.forEach(clearTimeout);
-  }, [suggestion]);
+  }, [suggestion, onComplete]);
 
   return (
     <div className="h-full overflow-y-auto space-y-3">
@@ -253,6 +256,7 @@ export default function App() {
   const [state, setState] = useState<State>({
     activeStep: 0, iteration: 1, scan1: null, scan2: null, suggestion: null, loading: false,
     variants: [{ port: BASE_PORT, label: 'Variant A', iteration: 1 }],
+    variantRevealed: false,
   });
 
   const goNext = useCallback(() => {
@@ -277,14 +281,9 @@ export default function App() {
       }
 
       const patch: Partial<State> = {};
-      // Step 2: LLM analysis — add variant B to left panel
       if (next === 2) {
         patch.suggestion = mockSuggestion;
-        const modifiedPort = BASE_PORT + s.iteration;
-        const alreadyAdded = s.variants.some((v) => v.port === modifiedPort);
-        if (!alreadyAdded) {
-          patch.variants = [...s.variants, { port: modifiedPort, label: `Variant ${String.fromCharCode(65 + s.variants.length)}`, iteration: s.iteration }];
-        }
+        patch.variantRevealed = false;
       }
       return { ...s, activeStep: next, ...patch };
     });
@@ -301,11 +300,27 @@ export default function App() {
     setState((s) => ({ ...s, activeStep: Math.max(0, s.activeStep - 1) }));
   }, []);
 
+  const handleLLMComplete = useCallback(() => {
+    setState((s) => {
+      if (s.variantRevealed) return s;
+      const modifiedPort = BASE_PORT + s.iteration;
+      const alreadyAdded = s.variants.some((v) => v.port === modifiedPort);
+      return {
+        ...s,
+        variantRevealed: true,
+        variants: alreadyAdded ? s.variants : [
+          ...s.variants,
+          { port: modifiedPort, label: `Variant ${String.fromCharCode(65 + s.variants.length)}`, iteration: s.iteration },
+        ],
+      };
+    });
+  }, []);
+
   const handleRestart = useCallback(() => {
     setState((s) => ({
       activeStep: 0, iteration: s.iteration + 1,
       scan1: null, scan2: null, suggestion: null, loading: false,
-      variants: s.variants, // keep all accumulated variants
+      variants: s.variants, variantRevealed: false,
     }));
   }, []);
 
@@ -332,7 +347,7 @@ export default function App() {
     }
     // Step 2: LLM analysis (merged outcome + suggestion)
     if (active === 2 && state.suggestion && state.scan1) {
-      return <CascadingLLM suggestion={state.suggestion} scan={state.scan1} />;
+      return <CascadingLLM suggestion={state.suggestion} scan={state.scan1} onComplete={handleLLMComplete} />;
     }
     // Step 3: compare scans (loading first)
     if (active === 3) {
@@ -428,13 +443,17 @@ export default function App() {
       <div className="flex-1 grid grid-cols-2 gap-0 overflow-hidden">
         {/* Left: Websites (scrollable) */}
         <div className="border-r border-border p-4 overflow-y-auto space-y-3">
-          {state.variants.map((v, i) => {
+          {state.variants.map((v) => {
             const isCurrentA = v.port === BASE_PORT + state.iteration - 1;
             const isCurrentB = v.port === BASE_PORT + state.iteration;
-            const isActive = isCurrentA || (isCurrentB && active >= 2);
+            const isNewlyRevealed = isCurrentB && state.variantRevealed;
+            const isActive = isCurrentA || isNewlyRevealed;
 
             return (
-              <div key={v.port} className={`transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-40'}`}>
+              <div
+                key={v.port}
+                className={`transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-40'} ${isNewlyRevealed ? 'animate-fade-up' : ''}`}
+              >
                 <SiteFrame
                   url={`http://localhost:${v.port}`}
                   label={`${v.label} — :${v.port}`}
@@ -444,10 +463,15 @@ export default function App() {
             );
           })}
 
-          {/* Placeholder for next variant (only during current iteration before step 3) */}
-          {active < 2 && (
-            <div className="h-[280px] bg-surface border border-border rounded-lg flex items-center justify-center opacity-40">
-              <p className="text-xs font-mono text-muted/30">Next variant — waiting for LLM</p>
+          {/* Placeholder for next variant — shown until LLM cascade completes */}
+          {!state.variantRevealed && (
+            <div className="h-[280px] bg-surface border border-border rounded-lg flex items-center justify-center opacity-30">
+              <div className="text-center">
+                <div className="text-2xl mb-2 opacity-40">🤖</div>
+                <p className="text-xs font-mono text-muted/40">
+                  {active >= 2 ? 'Generating variant...' : 'Next variant — waiting for LLM'}
+                </p>
+              </div>
             </div>
           )}
         </div>
