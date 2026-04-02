@@ -19,6 +19,12 @@ const STEPS = [
   { label: 'Next Iteration', icon: '🔄' },
 ];
 
+interface Variant {
+  port: number;
+  label: string;
+  iteration: number; // which iteration introduced it
+}
+
 interface State {
   activeStep: number;
   iteration: number;
@@ -26,6 +32,7 @@ interface State {
   scan2: BrainScanResult | null;
   suggestion: LLMSuggestion | null;
   loading: boolean;
+  variants: Variant[]; // all variants accumulated across iterations
 }
 
 // ── Loading scanner graphic ──────────────────────────
@@ -246,6 +253,7 @@ function SiteFrame({ url, label, className = '' }: { url: string; label: string;
 export default function App() {
   const [state, setState] = useState<State>({
     activeStep: 0, iteration: 1, scan1: null, scan2: null, suggestion: null, loading: false,
+    variants: [{ port: BASE_PORT, label: 'Variant A', iteration: 1 }],
   });
 
   const goNext = useCallback(() => {
@@ -271,6 +279,14 @@ export default function App() {
 
       const patch: Partial<State> = {};
       if (next === 2) patch.suggestion = mockSuggestion;
+      // Step 3: show both variants — add variant B if not yet present
+      if (next === 3) {
+        const modifiedPort = BASE_PORT + s.iteration;
+        const alreadyAdded = s.variants.some((v) => v.port === modifiedPort);
+        if (!alreadyAdded) {
+          patch.variants = [...s.variants, { port: modifiedPort, label: `Variant ${String.fromCharCode(65 + s.variants.length)}`, iteration: s.iteration }];
+        }
+      }
       return { ...s, activeStep: next, ...patch };
     });
   }, []);
@@ -287,7 +303,11 @@ export default function App() {
   }, []);
 
   const handleRestart = useCallback(() => {
-    setState((s) => ({ activeStep: 0, iteration: s.iteration + 1, scan1: null, scan2: null, suggestion: null, loading: false }));
+    setState((s) => ({
+      activeStep: 0, iteration: s.iteration + 1,
+      scan1: null, scan2: null, suggestion: null, loading: false,
+      variants: s.variants, // keep all accumulated variants
+    }));
   }, []);
 
   const active = state.activeStep;
@@ -418,14 +438,28 @@ export default function App() {
 
       {/* Two-column content */}
       <div className="flex-1 grid grid-cols-2 gap-0 overflow-hidden">
-        {/* Left: Websites */}
-        <div className="border-r border-border p-4 flex flex-col gap-3 overflow-hidden">
-          <SiteFrame url={urls.original} label={`Variant A — :${BASE_PORT + state.iteration - 1}`} className="flex-1" />
-          {active >= 3 ? (
-            <SiteFrame url={urls.modified} label={`Variant B — :${BASE_PORT + state.iteration}`} className="flex-1" />
-          ) : (
-            <div className="flex-1 bg-surface border border-border rounded-lg flex items-center justify-center">
-              <p className="text-xs font-mono text-muted/30">Variant B — waiting for LLM</p>
+        {/* Left: Websites (scrollable) */}
+        <div className="border-r border-border p-4 overflow-y-auto space-y-3">
+          {state.variants.map((v, i) => {
+            const isCurrentA = v.port === BASE_PORT + state.iteration - 1;
+            const isCurrentB = v.port === BASE_PORT + state.iteration;
+            const isActive = isCurrentA || (isCurrentB && active >= 3);
+
+            return (
+              <div key={v.port} className={`transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-40'}`}>
+                <SiteFrame
+                  url={`http://localhost:${v.port}`}
+                  label={`${v.label} — :${v.port}`}
+                  className="h-[280px]"
+                />
+              </div>
+            );
+          })}
+
+          {/* Placeholder for next variant (only during current iteration before step 3) */}
+          {active < 3 && (
+            <div className="h-[280px] bg-surface border border-border rounded-lg flex items-center justify-center opacity-40">
+              <p className="text-xs font-mono text-muted/30">Next variant — waiting for LLM</p>
             </div>
           )}
         </div>
