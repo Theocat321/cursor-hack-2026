@@ -4,6 +4,8 @@ import subprocess
 import time
 from pathlib import Path
 
+import numpy as np
+
 _client = None  # lazily initialised so module imports without OPENAI_API_KEY set
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
@@ -32,6 +34,22 @@ def _get_client():
     return _client
 
 
+def _summarize_tribe_result(tribe_result: dict) -> dict:
+    """Replace the raw preds array with compact summary stats."""
+    preds = np.array(tribe_result["preds"])  # (n_timesteps, n_vertices)
+    return {
+        "segments": tribe_result["segments"],
+        "preds_summary": {
+            "shape": list(preds.shape),
+            "mean_activation": float(preds.mean()),
+            "std_activation": float(preds.std()),
+            "top_1pct_threshold": float(np.percentile(preds, 99)),
+            "peak_timestep": int(preds.mean(axis=1).argmax()),
+            "n_active_vertices": int((preds.mean(axis=0) > np.percentile(preds, 90)).sum()),
+        },
+    }
+
+
 def apply_llm_changes(tribe_result: dict, landing_page_path: str) -> list[str]:
     lp = Path(landing_page_path).resolve()
     git_root = str(lp.parent)
@@ -39,7 +57,7 @@ def apply_llm_changes(tribe_result: dict, landing_page_path: str) -> list[str]:
 
     files = _read_source_files(lp, src_dir)
     files_json = json.dumps(files, indent=2)
-    tribe_json = json.dumps(tribe_result, indent=2)
+    tribe_json = json.dumps(_summarize_tribe_result(tribe_result), indent=2)
 
     ts = int(time.time())
     branches = []
@@ -77,7 +95,7 @@ def _read_source_files(lp: Path, src_dir: Path) -> dict[str, str]:
 
 def _call_gpt4o(user_prompt: str) -> dict[str, str]:
     response = _get_client().chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4.5-preview",
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
