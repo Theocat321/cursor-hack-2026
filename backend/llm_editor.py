@@ -6,25 +6,22 @@ from pathlib import Path
 
 _client = None  # lazily initialised so module imports without OPENAI_API_KEY set
 
+_PROMPTS_DIR = Path(__file__).parent / "prompts"
+
 _SYSTEM_PROMPT = (
     "You are a frontend design engineer. You will receive React/Tailwind source files "
     "and a UI analysis result. Return ONLY a JSON object mapping relative file paths "
     "to their complete new contents. No explanation, no markdown, just the JSON."
 )
 
-_V1_TEMPLATE = (
+_FILE_HEADER = (
     "Here are the source files:\n{files_json}\n\n"
     "Here is the UI analysis:\n{tribe_result}\n\n"
-    "Make conservative, targeted improvements to the design — improve spacing, typography, "
-    "color contrast, and visual hierarchy. Keep the overall structure intact."
 )
 
-_V2_TEMPLATE = (
-    "Here are the source files:\n{files_json}\n\n"
-    "Here is the UI analysis:\n{tribe_result}\n\n"
-    "Make bold, creative redesign changes — rethink layout, visual style, and component "
-    "structure to make this landing page significantly more compelling."
-)
+
+def _load_design_prompt(filename: str) -> str:
+    return (_PROMPTS_DIR / filename).read_text()
 
 
 def _get_client():
@@ -47,12 +44,13 @@ def apply_llm_changes(tribe_result: dict, landing_page_path: str) -> list[str]:
     ts = int(time.time())
     branches = []
 
-    for version, template in [("v1", _V1_TEMPLATE), ("v2", _V2_TEMPLATE)]:
+    design_prompts = [_load_design_prompt("design_A.md"), _load_design_prompt("design_B.md")]
+    for version, design_prompt in zip(["v1", "v2"], design_prompts):
         branch = f"llm-changes-{ts}-{version}"
         subprocess.run(["git", "-C", git_root, "checkout", "main"], check=True, capture_output=True)
         subprocess.run(["git", "-C", git_root, "checkout", "-b", branch], check=True, capture_output=True)
 
-        user_prompt = template.format(files_json=files_json, tribe_result=tribe_json)
+        user_prompt = _FILE_HEADER.format(files_json=files_json, tribe_result=tribe_json) + design_prompt
         changes = _call_gpt4o(user_prompt)
         _write_files(lp, changes)
 
