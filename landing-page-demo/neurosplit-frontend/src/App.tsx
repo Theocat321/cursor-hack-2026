@@ -53,26 +53,29 @@ export default function App() {
   return (
     <div className="min-h-screen bg-dark text-white font-sans">
       {/* ── Hero ──────────────────────────────── */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden px-6">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue/15 via-transparent to-magenta/15 animate-gradient" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-magenta/10 rounded-full blur-3xl" />
+      <section className="hero-bad min-h-screen flex items-center justify-center relative overflow-hidden px-6" style={{ background: 'linear-gradient(135deg, #ff0000, #00ff00, #0000ff, #ffff00, #ff00ff, #00ffff)', backgroundSize: '400% 400%', animation: 'gradient-shift 2s linear infinite' }}>
+        <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,0,0.3) 10px, rgba(255,255,0,0.3) 20px)' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/40 rounded-full blur-xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-lime-500/40 rounded-full blur-xl" />
 
-        <div className="relative z-10 max-w-4xl text-center">
-          <p className="text-sm text-cyan tracking-[0.3em] uppercase mb-6 animate-pulse-glow">
-            London, 2026
+        <div className="relative z-10 max-w-4xl text-left pl-4 pr-40">
+          <p className="text-3xl text-yellow-300 tracking-[0.5em] uppercase mb-1 underline" style={{ fontFamily: 'Comic Sans MS, cursive', textShadow: '2px 2px 0 #ff0000, -2px -2px 0 #00ff00' }}>
+            ★★★ London, 2026 ★★★
           </p>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
+          <h1 className="text-5xl md:text-9xl font-black tracking-widest uppercase leading-[1.4]" style={{ fontFamily: 'Papyrus, fantasy', wordSpacing: '0.5em' }}>
             Something is happening{' '}
-            <span className="bg-gradient-to-r from-blue to-magenta bg-clip-text text-transparent">
+            <span className="underline decoration-wavy decoration-yellow-400">
               in London
             </span>{' '}
             right now.
           </h1>
-          <p className="text-lg text-gray-400 mt-6 max-w-xl mx-auto leading-relaxed">
+          <p className="text-2xl text-lime-300 mt-1 max-w-xl leading-tight font-bold italic underline" style={{ fontFamily: 'Impact, sans-serif', letterSpacing: '0.2em', textShadow: '3px 3px 0 #ff00ff' }}>
             The city is building. The energy is unmistakable. This is the moment
             you either join or watch from the sidelines.
           </p>
+          <marquee className="mt-4 text-yellow-200 text-xl font-bold" scrollamount="8">
+            🚀🔥 LONDONMAXXING IS REAL 🔥🚀 LONDONMAXXING IS REAL 🚀🔥 LONDONMAXXING IS REAL 🔥🚀
+          </marquee>
         </div>
       </section>
 
