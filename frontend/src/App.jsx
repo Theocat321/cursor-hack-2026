@@ -86,6 +86,26 @@ export default function App() {
     }
   }
 
+  async function handleResumePipeline() {
+    setPipelineLoading(true)
+    setPipelineError(null)
+
+    try {
+      const res = await fetch('/pipeline/resume', { method: 'POST' })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setPipelineError(data.detail || 'Resume failed')
+      } else {
+        setPreviewData(data)
+      }
+    } catch (err) {
+      setPipelineError(err.message)
+    } finally {
+      setPipelineLoading(false)
+    }
+  }
+
   async function handleTestComparison() {
     setTestLoading(true)
     setTestError(null)
@@ -191,6 +211,14 @@ export default function App() {
                 className="w-full rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {pipelineLoading ? 'Running pipeline…' : 'Run Pipeline'}
+              </button>
+              <button
+                type="button"
+                onClick={handleResumePipeline}
+                disabled={loading || pipelineLoading}
+                className="w-full rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              >
+                {pipelineLoading ? 'Resuming…' : 'Resume (skip inference)'}
               </button>
               <button
                 type="button"
