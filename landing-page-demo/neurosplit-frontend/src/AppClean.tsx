@@ -52,39 +52,63 @@ export default function AppClean() {
 
   return (
     <div className="min-h-screen bg-dark text-white font-sans">
-      {/* -- Hero -------------------------------- */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden px-6 bg-gradient-to-br from-dark via-[#0d1117] to-dark">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-magenta/10 rounded-full blur-3xl" />
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_20%,rgba(0,163,255,0.08),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(255,60,172,0.07),transparent_28%),radial-gradient(circle_at_50%_85%,rgba(0,240,255,0.06),transparent_34%)]" />
 
-        <div className="relative z-10 max-w-3xl text-center">
-          <p className="text-sm text-blue uppercase tracking-[0.3em] mb-6">
-            London, 2026
-          </p>
-          <h1 className="text-5xl md:text-8xl font-black tracking-tight leading-[1.1] mb-8">
-            Something is happening{' '}
-            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">
-              in London
-            </span>{' '}
-            right now.
-          </h1>
-          <p className="text-lg text-gray-400 max-w-xl mx-auto leading-relaxed">
-            The city is building. The energy is unmistakable. This is the moment
-            you either join or watch from the sidelines.
-          </p>
+      <section className="relative min-h-screen flex items-center px-6 overflow-hidden">
+        <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-[1.15fr_0.85fr] gap-12 items-center py-20 md:py-28">
+          <div>
+            <p className="text-xs font-mono uppercase tracking-[0.3em] text-blue mb-6 reveal-up">
+              London, 2026
+            </p>
+            <h1 className="font-display text-[clamp(3.4rem,8vw,7.5rem)] leading-[0.95] tracking-[-0.04em] reveal-up">
+              Something is happening{' '}
+              <span className="bg-gradient-to-r from-blue via-cyan to-magenta bg-clip-text text-transparent">
+                in London
+              </span>{' '}
+              right now.
+            </h1>
+            <p className="mt-8 max-w-2xl text-[clamp(1.05rem,2vw,1.3rem)] leading-relaxed text-gray-300 reveal-up reveal-delay-1">
+              The city is building. The energy is unmistakable. This is the
+              moment you either join or watch from the sidelines.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 reveal-up reveal-delay-2">
+            {people.slice(0, 4).map((person) => (
+              <div
+                key={person.name}
+                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] aspect-[0.88]"
+              >
+                <img
+                  src={person.img}
+                  alt={person.name}
+                  className="w-full h-full object-cover grayscale-[0.25] brightness-75 transition duration-500 group-hover:scale-105 group-hover:brightness-100 group-hover:grayscale-0"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <p className="text-sm font-semibold">{person.name}</p>
+                  <p className="text-[11px] mt-1 font-mono uppercase tracking-[0.14em] text-gray-400">
+                    {person.role}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* -- Pulse Stats ------------------------- */}
-      <section className="py-16 px-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat) => (
+      <section className="px-6 pb-8 md:pb-14">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((stat, i) => (
             <div
               key={stat.label}
-              className="border border-blue/20 rounded-lg p-6 bg-blue/5 hover:bg-blue/10 transition-colors"
+              className="reveal-up rounded-2xl border border-white/10 bg-white/[0.04] p-6 card-lift"
+              style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="text-3xl font-black text-blue">{stat.value}</div>
-              <div className="text-sm text-gray-500 mt-1 uppercase tracking-wide">
+              <div className="text-[clamp(1.8rem,3vw,2.5rem)] font-display leading-none text-white">
+                {stat.value}
+              </div>
+              <div className="mt-3 text-xs font-mono uppercase tracking-[0.18em] text-gray-400">
                 {stat.label}
               </div>
             </div>
@@ -92,99 +116,116 @@ export default function AppClean() {
         </div>
       </section>
 
-      {/* -- Manifesto --------------------------- */}
-      <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto border-l-2 border-blue/30 pl-8">
-          <p className="text-2xl md:text-3xl font-medium text-gray-200 leading-relaxed mb-8">
-            "Go to the thing. Reply YES. Leave the house. Cross the river. Say
-            yes to the weird invite. Build the thing nobody asked for. Ship it
-            before it's ready."
+      <section className="px-6 py-20 md:py-28">
+        <div className="max-w-4xl mx-auto reveal-up">
+          <div className="w-16 h-px bg-gradient-to-r from-blue to-cyan mb-8" />
+          <p className="font-display text-[clamp(2rem,4.6vw,4rem)] leading-[1.06] tracking-[-0.03em] text-white mb-8">
+            “Go to the thing. Reply YES. Leave the house. Cross the river. Say
+            yes to the weird invite.”
           </p>
-          <p className="text-lg text-gray-400 leading-relaxed mb-8">
-            London doesn't wait for permission. The best things here started as
-            accidents — accidental meetings, accidental companies, accidental
-            movements. The city rewards people who show up.
-          </p>
-          <p className="text-lg text-gray-400 leading-relaxed">
-            From Shoreditch warehouses to King's Cross co-working spaces, from
-            late-night hackathons to Sunday morning coffees that turn into
-            companies — the pattern is the same. Proximity plus energy plus
-            serendipity. That's the London formula.
-          </p>
+          <div className="grid md:grid-cols-2 gap-6 text-gray-400 leading-8">
+            <p>
+              London doesn’t wait for permission. The best things here started
+              as accidents — accidental meetings, accidental companies,
+              accidental movements. The city rewards people who show up.
+            </p>
+            <p>
+              From Shoreditch warehouses to King’s Cross co-working spaces, from
+              late-night hackathons to Sunday morning coffees that turn into
+              companies — the pattern is the same. Proximity plus energy plus
+              serendipity.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* -- People Grid ------------------------- */}
-      <section className="py-16 px-6">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-sm text-gray-500 uppercase tracking-[0.2em] mb-10 text-center">
-            The people you'll meet
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-            {people.map((person) => (
-              <div key={person.name} className="text-center">
-                <img
-                  src={person.img}
-                  alt={person.name}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-blue/30 grayscale hover:grayscale-0 transition-all duration-300"
-                />
-                <p className="text-white font-semibold text-sm">{person.name}</p>
-                <p className="text-blue/80 text-xs mt-1 italic">
-                  "{person.descriptor}"
-                </p>
-                <p className="text-gray-500 text-xs mt-1">{person.role}</p>
-              </div>
+      <section className="px-6 py-20 md:py-28">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-12 text-center reveal-up">
+            <p className="text-xs font-mono uppercase tracking-[0.28em] text-gray-500">
+              The builders
+            </p>
+            <h2 className="mt-4 font-display text-[clamp(2.3rem,5vw,4.8rem)] leading-[0.96] tracking-[-0.04em]">
+              People shaping the city
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+            {people.map((person, i) => (
+              <article
+                key={person.name}
+                className={`group reveal-up overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] card-lift ${i % 3 === 1 ? 'md:translate-y-8' : ''}`}
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className="relative aspect-[0.9]">
+                  <img
+                    src={person.img}
+                    alt={person.name}
+                    className="w-full h-full object-cover grayscale brightness-75 transition duration-500 group-hover:scale-105 group-hover:brightness-100 group-hover:grayscale-0"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/65 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
+                    <p className="text-base font-semibold text-white">{person.name}</p>
+                    <p className="mt-1 text-sm italic text-blue/80">“{person.descriptor}”</p>
+                    <p className="mt-2 text-[11px] font-mono uppercase tracking-[0.14em] text-gray-400">
+                      {person.role}
+                    </p>
+                  </div>
+                </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* -- CTA --------------------------------- */}
-      <section className="py-24 px-6 text-center">
-        <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight mb-4">
-          Find your{' '}
-          <span className="bg-gradient-to-r from-blue to-magenta bg-clip-text text-transparent">
-            Londonmaxxing
-          </span>{' '}
-          people
-        </h2>
-        <p className="text-gray-400 mb-10 max-w-md mx-auto">
-          Join the movement. Get the signal, not the noise.
-        </p>
+      <section className="px-6 py-24 md:py-32 text-center">
+        <div className="max-w-4xl mx-auto rounded-[2rem] border border-white/10 bg-white/[0.05] p-8 md:p-12 reveal-up">
+          <h2 className="font-display text-[clamp(2.4rem,6vw,5.3rem)] leading-[0.95] tracking-[-0.04em] mb-4">
+            Find your{' '}
+            <span className="bg-gradient-to-r from-blue via-cyan to-magenta bg-clip-text text-transparent">
+              Londonmaxxing
+            </span>{' '}
+            people
+          </h2>
+          <p className="text-gray-400 mb-10 max-w-xl mx-auto text-lg leading-8">
+            Join the movement. Get the signal, not the noise.
+          </p>
 
-        {submitted ? (
-          <div className="inline-flex items-center gap-2 bg-blue/10 border border-blue/30 rounded-lg px-6 py-3">
-            <span className="text-cyan font-medium">You're in. Welcome to the movement.</span>
-          </div>
-        ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (email) setSubmitted(true);
-            }}
-            className="flex flex-col sm:flex-row gap-3 items-center justify-center"
-          >
-            <input
-              type="email"
-              required
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-white/10 border border-blue/30 text-white placeholder-gray-500 px-5 py-3 rounded-lg w-full max-w-sm focus:outline-none focus:border-cyan transition-colors"
-            />
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-blue to-magenta text-white font-bold px-8 py-3 rounded-lg uppercase tracking-wide hover:opacity-90 transition-opacity cursor-pointer"
+          {submitted ? (
+            <div className="inline-flex items-center gap-3 bg-blue/10 border border-blue/30 rounded-full px-6 py-3 text-cyan">
+              <span className="inline-block h-2 w-2 rounded-full bg-cyan shadow-[0_0_14px_rgba(0,240,255,0.8)]" />
+              <span className="font-medium">You’re in. Welcome to the movement.</span>
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (email) setSubmitted(true);
+              }}
+              className="max-w-2xl mx-auto"
             >
-              I'm in
-            </button>
-          </form>
-        )}
+              <div className="flex flex-col sm:flex-row gap-3 rounded-[1.5rem] border border-white/10 bg-dark/70 p-3">
+                <input
+                  type="email"
+                  required
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/[0.04] border border-white/8 text-white placeholder-gray-500 px-5 py-4 rounded-xl w-full focus:outline-none focus:border-cyan transition-colors"
+                />
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-blue to-magenta text-white font-mono text-sm px-8 py-4 rounded-xl uppercase tracking-[0.16em] hover:-translate-y-0.5 hover:opacity-95 transition cursor-pointer"
+                >
+                  I’m in
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </section>
 
-      {/* -- Footer ------------------------------ */}
       <footer className="border-t border-white/10 py-8 px-6 text-center">
-        <p className="text-gray-600 text-sm">
+        <p className="text-gray-600 text-sm font-mono uppercase tracking-[0.16em]">
           Londonmaxxing — the city rewards people who show up.
         </p>
       </footer>

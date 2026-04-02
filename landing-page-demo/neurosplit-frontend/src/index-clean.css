@@ -2,13 +2,54 @@
 
 @theme {
   --font-sans: 'Inter', sans-serif;
-  --color-dark: #0A0A0A;
-  --color-blue: #00A3FF;
-  --color-magenta: #FF3CAC;
-  --color-cyan: #00F0FF;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-dark: #0a0b10;
+  --color-blue: #00a3ff;
+  --color-magenta: #ff3cac;
+  --color-cyan: #00f0ff;
+}
+
+:root {
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background: #0A0A0A;
+  background: #0a0b10;
+  color: #fff;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-up {
+  animation: reveal-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.reveal-delay-2 {
+  animation-delay: 0.24s;
+}
+
+.card-lift {
+  transition: transform 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
 }
