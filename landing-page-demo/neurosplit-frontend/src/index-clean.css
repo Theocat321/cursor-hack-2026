@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --color-dark: #0A0A0A;
+  --color-blue: #00A3FF;
+  --color-magenta: #FF3CAC;
+  --color-cyan: #00F0FF;
+}
+
+body {
+  margin: 0;
+  background: #0A0A0A;
+}
