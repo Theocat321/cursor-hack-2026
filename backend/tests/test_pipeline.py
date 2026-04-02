@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import AsyncClient, ASGITransport
 
-# Patch tribev2 before importing anything that touches inference
 mock_tribe_module = MagicMock()
 mock_tribe_module.TribeModel.from_pretrained.return_value = MagicMock()
 sys.modules["tribev2"] = mock_tribe_module
@@ -14,12 +13,14 @@ from main import app  # noqa: E402
 
 @pytest.mark.asyncio
 async def test_pipeline_returns_file_and_result():
-    fake_result = {"preds": [[0.1, 0.2], [0.3, 0.4]], "segments": [{"start": 0, "end": 1}]}
+    fake_result = {"preds": [[0.1, 0.2]], "segments": [{"start": 0, "end": 1}]}
     fake_branches = ["llm-changes-100-v1", "llm-changes-100-v2"]
+    fake_urls = ["http://localhost:6005", "http://localhost:6006"]
 
     with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
          patch("main.run_inference", return_value=fake_result), \
-         patch("main.apply_llm_changes", return_value=fake_branches):
+         patch("main.apply_llm_changes", return_value=fake_branches), \
+         patch("main.start_previews", return_value=fake_urls):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/pipeline", json={"url": "https://example.com"})
 
@@ -33,15 +34,35 @@ async def test_pipeline_returns_file_and_result():
 async def test_pipeline_returns_branches():
     fake_result = {"preds": [[0.1]], "segments": []}
     fake_branches = ["llm-changes-100-v1", "llm-changes-100-v2"]
+    fake_urls = ["http://localhost:6005", "http://localhost:6006"]
 
     with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
          patch("main.run_inference", return_value=fake_result), \
-         patch("main.apply_llm_changes", return_value=fake_branches):
+         patch("main.apply_llm_changes", return_value=fake_branches), \
+         patch("main.start_previews", return_value=fake_urls):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/pipeline", json={"url": "https://example.com"})
 
     assert response.status_code == 200
     assert response.json()["branches"] == fake_branches
+
+
+@pytest.mark.asyncio
+async def test_pipeline_returns_preview_urls_and_brain_results():
+    fake_result = {"preds": [[0.1]], "segments": []}
+    fake_branches = ["llm-changes-100-v1", "llm-changes-100-v2"]
+    fake_urls = ["http://localhost:6005", "http://localhost:6006"]
+
+    with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
+         patch("main.run_inference", return_value=fake_result), \
+         patch("main.apply_llm_changes", return_value=fake_branches), \
+         patch("main.start_previews", return_value=fake_urls):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.post("/pipeline", json={"url": "https://example.com"})
+
+    body = response.json()
+    assert body["preview_urls"] == fake_urls
+    assert len(body["brain_results"]) == 2
 
 
 @pytest.mark.asyncio
@@ -77,3 +98,19 @@ async def test_pipeline_returns_500_on_llm_error():
 
     assert response.status_code == 500
     assert "GPT error" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_pipeline_returns_500_on_preview_error():
+    fake_result = {"preds": [[0.1]], "segments": []}
+    fake_branches = ["llm-changes-100-v1", "llm-changes-100-v2"]
+
+    with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
+         patch("main.run_inference", return_value=fake_result), \
+         patch("main.apply_llm_changes", return_value=fake_branches), \
+         patch("main.start_previews", side_effect=RuntimeError("vite failed")):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.post("/pipeline", json={"url": "https://example.com"})
+
+    assert response.status_code == 500
+    assert "vite failed" in response.json()["detail"]

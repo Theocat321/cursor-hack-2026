@@ -23,7 +23,11 @@ def test_run_inference_returns_preds_and_segments(tmp_path):
 
     mock_df = MagicMock()
     mock_preds = np.zeros((10, 5))
-    mock_segments = [{"start": 0, "end": 1}]
+    mock_seg = MagicMock()
+    mock_seg.start = 0.0
+    mock_seg.duration = 1.0
+    mock_seg.timeline = "test"
+    mock_segments = [mock_seg]
 
     mock_model_instance.get_events_dataframe.return_value = mock_df
     mock_model_instance.predict.return_value = (mock_preds, mock_segments)
@@ -33,7 +37,7 @@ def test_run_inference_returns_preds_and_segments(tmp_path):
         result = inference.run_inference(str(fake_webm))
 
     assert result["preds"] == mock_preds.tolist()
-    assert result["segments"] == mock_segments
+    assert result["segments"] == [{"start": 0.0, "duration": 1.0, "timeline": "test"}]
 
 
 def test_run_inference_cleans_up_mp4_on_success(tmp_path):
