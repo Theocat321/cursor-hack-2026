@@ -1,1 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
 venv/
+.pytest_cache/
+
+# Backend output
+backend/recordings/
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+
+# OS
+.DS_Store
