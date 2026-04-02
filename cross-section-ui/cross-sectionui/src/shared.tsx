@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { mockScanOriginal, mockScanModified, mockSuggestion } from './mocks/data';
+import { scanVariantA as mockScanOriginal, scanVariantB as mockScanModified, suggestionAtoB as mockSuggestion } from './mocks/data';
 import type { BrainScanResult, LLMSuggestion } from './types';
 
 export const ORIGINAL_URL = 'http://localhost:5173';

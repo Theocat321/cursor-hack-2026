@@ -1,6 +1,27 @@
 import { useState, useCallback, useEffect } from 'react';
-import { mockScanOriginal, mockScanModified, mockSuggestion } from './mocks/data';
+import { scanVariantA, scanVariantB, scanVariantC, suggestionAtoB, suggestionBtoC } from './mocks/data';
 import type { BrainScanResult, LLMSuggestion } from './types';
+
+// Per-iteration data: which scans and suggestions to use
+function getIterationData(iteration: number) {
+  if (iteration === 1) {
+    return {
+      baselineScan: scanVariantA,
+      comparisonScan: scanVariantB,
+      suggestion: suggestionAtoB,
+      labelA: 'Variant A',
+      labelB: 'Variant B',
+    };
+  }
+  // Iteration 2+
+  return {
+    baselineScan: scanVariantB, // winner from iteration 1
+    comparisonScan: scanVariantC,
+    suggestion: suggestionBtoC,
+    labelA: 'Variant B',
+    labelB: 'Variant C',
+  };
+}
 
 const BASE_PORT = 6001;
 function getUrls(iteration: number) {
@@ -263,26 +284,32 @@ export default function App() {
     setState((s) => {
       const next = s.activeStep + 1;
       if (next >= STEPS.length) return s;
+      const iterData = getIterationData(s.iteration);
 
-      // Step 0 → 1: trigger loading, then reveal scan after delay
+      // Step 0 → 1: scan the baseline
       if (next === 1 && !s.scan1) {
+        // Iteration 2+: we already know the baseline scan, load instantly
+        if (s.iteration > 1) {
+          return { ...s, activeStep: 1, scan1: iterData.baselineScan };
+        }
+        // Iteration 1: show loading animation
         setTimeout(() => {
-          setState((prev) => ({ ...prev, scan1: mockScanOriginal, loading: false }));
+          setState((prev) => ({ ...prev, scan1: iterData.baselineScan, loading: false }));
         }, 2500);
         return { ...s, activeStep: 0, loading: true };
       }
 
-      // Step 2 → 3: trigger loading for second TRIBE scan
+      // Step 2 → 3: scan both variants
       if (next === 3 && !s.scan2) {
         setTimeout(() => {
-          setState((prev) => ({ ...prev, scan2: mockScanModified, loading: false }));
+          setState((prev) => ({ ...prev, scan2: iterData.comparisonScan, loading: false }));
         }, 2500);
         return { ...s, activeStep: 3, loading: true };
       }
 
       const patch: Partial<State> = {};
       if (next === 2) {
-        patch.suggestion = mockSuggestion;
+        patch.suggestion = iterData.suggestion;
         patch.variantRevealed = false;
       }
       return { ...s, activeStep: next, ...patch };
@@ -330,6 +357,8 @@ export default function App() {
     ? (((state.scan2.overall_engagement - state.scan1.overall_engagement) / state.scan1.overall_engagement) * 100) : 0;
   const urls = getUrls(state.iteration);
 
+  const iterData = getIterationData(state.iteration);
+
   const renderRight = () => {
     // Step 0: loading scanner or idle
     if (active === 0) {
@@ -343,7 +372,7 @@ export default function App() {
     }
     // Step 1: big brain response
     if (active === 1 && state.scan1) {
-      return <div className="flex justify-center"><BigBrainVis scan={state.scan1} label="Original — Brain Response" /></div>;
+      return <div className="flex justify-center"><BigBrainVis scan={state.scan1} label={`${iterData.labelA} — Brain Response`} /></div>;
     }
     // Step 2: LLM analysis (merged outcome + suggestion)
     if (active === 2 && state.suggestion && state.scan1) {
@@ -354,9 +383,9 @@ export default function App() {
       if (state.loading || !state.scan2) return <ScannerLoading />;
       return (
         <div className="flex items-center justify-center gap-8 h-full">
-          <SmallBrainVis scan={state.scan1!} label="Original" />
+          <SmallBrainVis scan={state.scan1!} label={iterData.labelA} />
           <div className="text-2xl text-muted">vs</div>
-          <SmallBrainVis scan={state.scan2} label="Modified" />
+          <SmallBrainVis scan={state.scan2} label={iterData.labelB} />
         </div>
       );
     }
@@ -368,11 +397,11 @@ export default function App() {
           <div className="text-xs text-muted font-mono uppercase tracking-wider mt-2 mb-6">neural engagement uplift</div>
           <div className="grid grid-cols-2 gap-4 w-full max-w-xs">
             <div className="bg-bg border border-border rounded-lg p-4 text-center">
-              <div className="text-[9px] font-mono text-muted uppercase mb-1">Original</div>
+              <div className="text-[9px] font-mono text-muted uppercase mb-1">{iterData.labelA}</div>
               <div className="text-2xl font-mono font-bold text-danger">{state.scan1.overall_engagement.toFixed(2)}</div>
             </div>
             <div className="bg-bg border border-success/30 rounded-lg p-4 text-center ring-1 ring-success/10">
-              <div className="text-[9px] font-mono text-muted uppercase mb-1">Modified 🏆</div>
+              <div className="text-[9px] font-mono text-muted uppercase mb-1">{iterData.labelB} 🏆</div>
               <div className="text-2xl font-mono font-bold text-success">{state.scan2.overall_engagement.toFixed(2)}</div>
             </div>
           </div>
@@ -384,7 +413,7 @@ export default function App() {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <div className="text-5xl">🔄</div>
-          <p className="text-sm text-muted"><strong className="text-accent">Modified variant</strong> → new baseline</p>
+          <p className="text-sm text-muted"><strong className="text-accent">{iterData.labelB}</strong> → new baseline</p>
           <button onClick={handleRestart} className="text-xs font-mono uppercase px-5 py-2.5 rounded-lg bg-accent text-bg hover:bg-accent/80 cursor-pointer transition-colors">
             Start Iteration {state.iteration + 1} →
           </button>
