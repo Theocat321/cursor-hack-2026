@@ -444,21 +444,36 @@ export default function App() {
         {/* Left: Websites (scrollable) */}
         <div className="border-r border-border p-4 overflow-y-auto space-y-3">
           {state.variants.map((v) => {
-            const isCurrentA = v.port === BASE_PORT + state.iteration - 1;
-            const isCurrentB = v.port === BASE_PORT + state.iteration;
+            const portA = BASE_PORT + state.iteration - 1;
+            const portB = BASE_PORT + state.iteration;
+            const isCurrentA = v.port === portA;
+            const isCurrentB = v.port === portB;
             const isNewlyRevealed = isCurrentB && state.variantRevealed;
             const isActive = isCurrentA || isNewlyRevealed;
+
+            // Scanning highlight: A scanned in steps 0,1; both A+B scanned in step 3
+            const scanningA = isCurrentA && (active === 0 || active === 1 || active === 3);
+            const scanningB = isCurrentB && active === 3 && state.variantRevealed;
+            const isScanning = scanningA || scanningB;
 
             return (
               <div
                 key={v.port}
                 className={`transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-40'} ${isNewlyRevealed ? 'animate-fade-up' : ''}`}
               >
-                <SiteFrame
-                  url={`http://localhost:${v.port}`}
-                  label={`${v.label} — :${v.port}`}
-                  className="h-[280px]"
-                />
+                <div className={`rounded-xl transition-all duration-500 ${isScanning ? 'ring-2 ring-accent shadow-[0_0_20px_rgba(6,182,212,0.3)]' : ''}`}>
+                  <SiteFrame
+                    url={`http://localhost:${v.port}`}
+                    label={`${v.label} — :${v.port}`}
+                    className="h-[280px]"
+                  />
+                  {isScanning && (
+                    <div className="flex items-center justify-center gap-1.5 py-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                      <span className="text-[9px] font-mono text-accent uppercase tracking-wider">Scanning</span>
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}
