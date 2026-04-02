@@ -47,7 +47,7 @@ export default function App() {
       </section>
 
       {/* ── Pulse Stats ──────────────────────── */}
-      <section className="py-16 px-6">
+      <section className="pt-80 pb-16 px-6">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
           {stats.map((stat) => (
             <div
