@@ -1,11 +1,13 @@
 # backend/llm_editor.py
 import json
+import logging
 import subprocess
 import time
 from pathlib import Path
 
 import numpy as np
 
+logger = logging.getLogger(__name__)
 _client = None  # lazily initialised so module imports without OPENAI_API_KEY set
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
@@ -67,13 +69,15 @@ def apply_llm_changes(tribe_result: dict, landing_page_path: str) -> list[str]:
     branches = []
 
     design_prompts = [_load_design_prompt("design_A.md"), _load_design_prompt("design_B.md")]
-    for version, design_prompt in zip(["v1", "v2"], design_prompts):
+    for i, (version, design_prompt) in enumerate(zip(["v1", "v2"], design_prompts), 1):
         branch = f"llm-changes-{ts}-{version}"
+        logger.info("Step 4/5: LLM variant %s/%s — calling GPT (%s)", i, len(design_prompts), version)
         subprocess.run(["git", "-C", git_root, "checkout", "main"], check=True, capture_output=True)
         subprocess.run(["git", "-C", git_root, "checkout", "-b", branch], check=True, capture_output=True)
 
         user_prompt = _FILE_HEADER.format(files_json=files_json, tribe_result=tribe_json) + design_prompt
         changes = _call_gpt4o(user_prompt)
+        logger.info("Step 4/5: GPT %s done — writing %d file(s)", version, len(changes))
         _write_files(lp, changes)
 
         subprocess.run(["git", "-C", git_root, "add", str(lp)], check=True, capture_output=True)
@@ -82,6 +86,7 @@ def apply_llm_changes(tribe_result: dict, landing_page_path: str) -> list[str]:
             check=True,
             capture_output=True,
         )
+        logger.info("Step 4/5: committed branch %s", branch)
         branches.append(branch)
 
     subprocess.run(["git", "-C", git_root, "checkout", "main"], check=True, capture_output=True)
