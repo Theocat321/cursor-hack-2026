@@ -95,7 +95,7 @@ def _read_source_files(lp: Path, src_dir: Path) -> dict[str, str]:
 
 def _call_gpt4o(user_prompt: str) -> dict[str, str]:
     response = _get_client().chat.completions.create(
-        model="gpt-4.5-preview",
+        model="gpt-5.4",
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
