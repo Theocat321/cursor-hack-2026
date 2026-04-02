@@ -2,8 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { mockScanOriginal, mockScanModified, mockSuggestion } from './mocks/data';
 import type { BrainScanResult, LLMSuggestion } from './types';
 
-const ORIGINAL_URL = 'http://localhost:6001';
-const MODIFIED_URL = 'http://localhost:6002';
+const BASE_PORT = 6001;
+function getUrls(iteration: number) {
+  const original = `http://localhost:${BASE_PORT + iteration - 1}`;
+  const modified = `http://localhost:${BASE_PORT + iteration}`;
+  return { original, modified };
+}
 
 const STEPS = [
   { label: 'Record & Scan', icon: '🧠' },
@@ -131,8 +135,8 @@ function SmallBrainVis({ scan, label }: { scan: BrainScanResult; label: string }
   const hot = level > 0.6;
   return (
     <div className="flex flex-col items-center">
-      <div className="text-[9px] font-mono text-muted uppercase tracking-wider mb-1">{label}</div>
-      <div className="relative w-28 h-28">
+      <div className="text-xs font-mono text-muted uppercase tracking-wider mb-2">{label}</div>
+      <div className="relative w-40 h-40">
         <svg viewBox="0 0 200 200" className="w-full h-full">
           <ellipse cx="100" cy="95" rx="75" ry="80" fill="#0f172a" stroke="#1e293b" strokeWidth="1.5" />
           <ellipse cx="100" cy="130" rx="40" ry="25" fill={scan.ventral_score > 0.5 ? '#06b6d4' : '#1e293b'} opacity={0.2 + scan.ventral_score * 0.7} />
@@ -290,6 +294,7 @@ export default function App() {
   const pct = ((active + 1) / STEPS.length) * 100;
   const uplift = state.scan1 && state.scan2
     ? (((state.scan2.overall_engagement - state.scan1.overall_engagement) / state.scan1.overall_engagement) * 100) : 0;
+  const urls = getUrls(state.iteration);
 
   const renderRight = () => {
     // Step 0: loading scanner or idle
@@ -415,9 +420,9 @@ export default function App() {
       <div className="flex-1 grid grid-cols-2 gap-0 overflow-hidden">
         {/* Left: Websites */}
         <div className="border-r border-border p-4 flex flex-col gap-3 overflow-hidden">
-          <SiteFrame url={ORIGINAL_URL} label="londonmaxxing.com — Original" className="flex-1" />
+          <SiteFrame url={urls.original} label={`Variant A — :${BASE_PORT + state.iteration - 1}`} className="flex-1" />
           {active >= 3 ? (
-            <SiteFrame url={MODIFIED_URL} label="londonmaxxing.com/v2 — Modified" className="flex-1" />
+            <SiteFrame url={urls.modified} label={`Variant B — :${BASE_PORT + state.iteration}`} className="flex-1" />
           ) : (
             <div className="flex-1 bg-surface border border-border rounded-lg flex items-center justify-center">
               <p className="text-xs font-mono text-muted/30">Variant B — waiting for LLM</p>
