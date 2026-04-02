@@ -4,7 +4,7 @@ import tempfile
 
 from tribev2 import TribeModel
 
-model = TribeModel.from_pretrained("facebook/tribev2", cache_folder="./cache")
+model = TribeModel.from_pretrained("facebook/tribev2", cache_folder="./cache", device="cpu")
 
 
 def run_inference(video_path: str) -> dict:
