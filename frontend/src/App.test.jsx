@@ -101,4 +101,53 @@ describe('App', () => {
       expect(screen.getByText(/TRIBE note for tests/)).toBeInTheDocument()
     })
   })
+
+  it('renders Run Pipeline button', () => {
+    render(<App />)
+    expect(screen.getByRole('button', { name: 'Run Pipeline' })).toBeInTheDocument()
+  })
+
+  it('shows PreviewPage when pipeline succeeds', async () => {
+    const pipelineResponse = {
+      file: 'recordings/abc.webm',
+      result: { preds: [[0.1]], segments: [] },
+      branches: ['llm-changes-100-v1', 'llm-changes-100-v2'],
+      preview_urls: ['http://localhost:6005', 'http://localhost:6006'],
+      brain_results: [
+        { preds: [[0.2]], segments: [] },
+        { preds: [[0.3]], segments: [] },
+      ],
+    }
+
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: async () => pipelineResponse,
+    })
+
+    render(<App />)
+    await userEvent.type(screen.getByPlaceholderText('https://example.com'), 'https://example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Run Pipeline' }))
+
+    await waitFor(() => {
+      expect(screen.getByTitle('V1 Conservative')).toBeInTheDocument()
+      expect(screen.getByTitle('V2 Bold Redesign')).toBeInTheDocument()
+      expect(screen.getByText('Brain V1')).toBeInTheDocument()
+      expect(screen.getByText('Brain V2')).toBeInTheDocument()
+    })
+  })
+
+  it('shows pipeline error when pipeline fails', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ detail: 'pipeline exploded' }),
+    })
+
+    render(<App />)
+    await userEvent.type(screen.getByPlaceholderText('https://example.com'), 'https://example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Run Pipeline' }))
+
+    await waitFor(() =>
+      expect(screen.getByText(/pipeline exploded/)).toBeInTheDocument()
+    )
+  })
 })
