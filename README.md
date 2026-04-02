@@ -5,7 +5,7 @@ Track: REVIEW + QA
 2. Observes project via video
 3. Run the video through meta v2
 4. results go through a prompt x2
-5. prompt changes website x22
+5. prompt changes website x2
 6. display the changes in a simple 4x grid to the user 
 
 
