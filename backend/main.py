@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-LANDING_PAGE_PATH = str(Path(__file__).parent.parent / "landing-page-demo")
+LANDING_PAGE_PATH = str(Path(__file__).parent.parent / "landing-page-demo" / "neurosplit-frontend")
 LAST_RESULT_PATH = Path(__file__).parent / "last_inference_result.json"
 
 

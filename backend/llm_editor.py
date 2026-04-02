@@ -36,7 +36,11 @@ def _get_client():
 
 def _summarize_tribe_result(tribe_result: dict) -> dict:
     """Replace the raw preds array with compact summary stats."""
-    preds = np.array(tribe_result["preds"])  # (n_timesteps, n_vertices)
+    preds = np.array(tribe_result["preds"], dtype=float)
+    if preds.ndim == 1:
+        preds = preds.reshape(1, -1)
+    if preds.size == 0:
+        return {"segments": tribe_result["segments"], "preds_summary": {"shape": list(preds.shape)}}
     return {
         "segments": tribe_result["segments"],
         "preds_summary": {

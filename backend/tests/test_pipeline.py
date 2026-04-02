@@ -19,6 +19,7 @@ async def test_pipeline_returns_file_and_result():
 
     with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
          patch("main.run_inference", return_value=fake_result), \
+         patch("main.generate_brain_images", return_value=["img1", "img2"]), \
          patch("main.apply_llm_changes", return_value=fake_branches), \
          patch("main.start_previews", return_value=fake_urls):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
@@ -38,6 +39,7 @@ async def test_pipeline_returns_branches():
 
     with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
          patch("main.run_inference", return_value=fake_result), \
+         patch("main.generate_brain_images", return_value=["img1", "img2"]), \
          patch("main.apply_llm_changes", return_value=fake_branches), \
          patch("main.start_previews", return_value=fake_urls):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
@@ -55,6 +57,7 @@ async def test_pipeline_returns_preview_urls_and_brain_results():
 
     with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
          patch("main.run_inference", return_value=fake_result), \
+         patch("main.generate_brain_images", return_value=["img1", "img2"]), \
          patch("main.apply_llm_changes", return_value=fake_branches), \
          patch("main.start_previews", return_value=fake_urls):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
@@ -92,6 +95,7 @@ async def test_pipeline_returns_500_on_llm_error():
 
     with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
          patch("main.run_inference", return_value=fake_result), \
+         patch("main.generate_brain_images", return_value=["img1", "img2"]), \
          patch("main.apply_llm_changes", side_effect=RuntimeError("GPT error")):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/pipeline", json={"url": "https://example.com"})
@@ -107,6 +111,7 @@ async def test_pipeline_returns_500_on_preview_error():
 
     with patch("main.record_scroll", new_callable=AsyncMock, return_value="recordings/test.webm"), \
          patch("main.run_inference", return_value=fake_result), \
+         patch("main.generate_brain_images", return_value=["img1", "img2"]), \
          patch("main.apply_llm_changes", return_value=fake_branches), \
          patch("main.start_previews", side_effect=RuntimeError("vite failed")):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
