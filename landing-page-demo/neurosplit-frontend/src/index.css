@@ -2,32 +2,19 @@
 
 @theme {
   --font-sans: 'Inter', sans-serif;
-  --font-serif: 'Playfair Display', serif;
+  --color-dark: #0A0A0A;
+  --color-blue: #00A3FF;
+  --color-magenta: #FF3CAC;
+  --color-cyan: #00F0FF;
+}
 
-  /* Variant A — Electric London */
-  --color-electric-black: #0A0A0A;
-  --color-electric-blue: #00A3FF;
-  --color-electric-magenta: #FF3CAC;
-  --color-electric-cyan: #00F0FF;
-
-  /* Variant B — Golden London */
-  --color-golden-cream: #FFFBF0;
-  --color-golden-navy: #0C1B33;
-  --color-golden-gold: #C5960C;
-  --color-golden-terracotta: #C75B39;
-  --color-golden-muted: #7A6E5A;
-
-  /* Dashboard */
-  --color-dash-bg: #111111;
-  --color-dash-surface: #1A1A1A;
-  --color-dash-border: #2A2A2A;
-  --color-dash-text: #E5E5E5;
-  --color-dash-muted: #888888;
-  --color-dash-accent: #00A3FF;
+body {
+  margin: 0;
+  background: #0A0A0A;
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.6; }
+  0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
 
@@ -37,23 +24,11 @@
   100% { background-position: 0% 50%; }
 }
 
-@keyframes bar-fill {
-  from { width: 0%; }
-}
-
 .animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+  animation: pulse-glow 2.5s ease-in-out infinite;
 }
 
-.animate-gradient-shift {
+.animate-gradient {
   background-size: 200% 200%;
-  animation: gradient-shift 6s ease infinite;
-}
-
-.animate-bar-fill {
-  animation: bar-fill 1s ease-out forwards;
-}
-
-body {
-  margin: 0;
+  animation: gradient-shift 8s ease infinite;
 }
