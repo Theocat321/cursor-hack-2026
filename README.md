@@ -4,8 +4,9 @@ Track: REVIEW + QA
 1. Run your project
 2. Observes project via video
 3. Run the video through meta v2
-4. results go through a prompt
-5. prompt changes website
+4. results go through a prompt x2
+5. prompt changes website x22
+6. display the changes in a simple 4x grid to the user 
 
 
 
@@ -25,3 +26,4 @@ Frontend
 
 Additional:
 - Elevenlabs audio
+- White circle
